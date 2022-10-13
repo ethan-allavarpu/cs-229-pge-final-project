@@ -1,0 +1,7 @@
+Distribution / Transmission,Circuit Name,De-Energization Date and Time,All-Clear Date and Time ,Restoration Date and Time,Key Communities,HFTD Tier(s),Total Customers,Residential Customers,Commercial / Industrial Customers,Medical Baseline Customers,AFN other than MBL Customers,Other Customers
+Distribution,CAL WATER 1102*,15/10/21 01:00,15/10/21 12:00,15/10/21 15:38,KERN,"Partially Outside HFTD, Tier 2",13,0,10,0,0,3
+Distribution,LAMONT 1104*,15/10/21 01:09,15/10/21 12:00,15/10/21 15:10,KERN,Tier 2,2,0,1,0,0,1
+Distribution,MAGUNDEN 1108*,15/10/21 01:05,15/10/21 12:00,15/10/21 15:12,KERN,"Partially Outside HFTD, Tier 2",38,20,9,0,1,9
+Distribution,SCE TEHACHAPI 1101*,15/10/21 01:16,15/10/21 12:00,15/10/21 14:26,KERN,Tier 2,3,2,1,0,2,0
+Distribution,TEJON 1102*,15/10/21 01:07,16/10/21 15:14,16/10/21 16:32,KERN,"Partially Outside HFTD, Tier 2",595,479,103,34,161,13
+Distribution,TEJON 1103*,15/10/21 01:00,15/10/21 12:00,15/10/21 14:46,KERN,"Partially Outside HFTD, Tier 2",15,4,10,0,0,1
