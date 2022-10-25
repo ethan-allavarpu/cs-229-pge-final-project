@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-10-09,,11.1,22.3,0.0,,,5.5,,,,OTTER,2020-10-14 20:06:00,OTTER,2020-10-14 20:06:00,True
+2020-10-10,,11.6,22.2,0.0,,,6.2,,,,OTTER,2020-10-14 20:06:00,OTTER,2020-10-14 20:06:00,True
+2020-10-11,,12.1,23.2,0.4,,,5.2,,,,OTTER,2020-10-14 20:06:00,OTTER,2020-10-14 20:06:00,True
+2020-10-12,,11.5,24.9,0.3,,,6.0,,,,OTTER,2020-10-14 20:06:00,OTTER,2020-10-14 20:06:00,True
+2020-10-13,,11.9,27.0,0.0,,,5.4,,,,OTTER,2020-10-14 20:06:00,OTTER,2020-10-14 20:06:00,True

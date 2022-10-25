@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-10-09,,2.6,21.4,0.0,,,3.6,,,,BANGOR,2020-10-14 19:14:00,BANGOR,2020-10-14 19:14:00,True
+2020-10-10,,2.3,18.6,0.0,,,5.5,,,,BANGOR,2020-10-14 19:14:00,BANGOR,2020-10-14 19:14:00,True
+2020-10-11,,5.1,18.4,0.0,,,5.4,,,,BANGOR,2020-10-14 19:14:00,BANGOR,2020-10-14 19:14:00,True
+2020-10-12,,0.7,16.0,0.3,,,3.8,,,,BANGOR,2020-10-14 19:14:00,BANGOR,2020-10-14 19:14:00,True
+2020-10-13,,2.0,13.9,0.0,,,5.0,,,,BANGOR,2020-10-14 19:14:00,BANGOR,2020-10-14 19:14:00,True

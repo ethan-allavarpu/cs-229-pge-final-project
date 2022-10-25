@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-10-17,24.3,-2.5,17.2,0.0,,,11.9,,,,BUTTE,2020-10-22 05:17:00,BUTTE,2020-10-22 05:17:00,True
+2020-10-18,,0.0,13.1,2.7,,,10.8,,,,BUTTE,2020-10-22 05:17:00,BUTTE,2020-10-22 05:17:00,True
+2020-10-19,,0.7,8.3,0.8,,,9.0,,,,BUTTE,2020-10-22 05:17:00,BUTTE,2020-10-22 05:17:00,True
+2020-10-20,,1.2,9.8,1.9,,,18.7,,,,BUTTE,2020-10-22 05:17:00,BUTTE,2020-10-22 05:17:00,True
+2020-10-21,,6.0,13.3,5.8,,,19.8,,,,BUTTE,2020-10-22 05:17:00,BUTTE,2020-10-22 05:17:00,True

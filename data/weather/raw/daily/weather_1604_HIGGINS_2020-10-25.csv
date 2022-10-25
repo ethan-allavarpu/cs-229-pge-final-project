@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-10-20,18.5,9.0,30.0,,,0.0,0.0,,,,HIGGINS,2020-10-25 17:38:00,HIGGINS,2020-10-25 17:38:00,True
+2020-10-21,18.5,9.0,29.0,,,0.0,0.3,,,,HIGGINS,2020-10-25 17:38:00,HIGGINS,2020-10-25 17:38:00,True
+2020-10-22,15.7,7.0,25.0,,,349.0,7.5,,,,HIGGINS,2020-10-25 17:38:00,HIGGINS,2020-10-25 17:38:00,True
+2020-10-23,,5.3,25.2,,,,4.4,,,,HIGGINS,2020-10-25 17:38:00,HIGGINS,2020-10-25 17:38:00,True
+2020-10-24,15.1,6.0,23.0,,,143.0,8.8,,,,HIGGINS,2020-10-25 17:38:00,HIGGINS,2020-10-25 17:38:00,True

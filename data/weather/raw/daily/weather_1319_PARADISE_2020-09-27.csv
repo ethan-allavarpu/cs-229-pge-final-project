@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-09-22,23.7,6.1,25.7,0.0,,,10.0,,,,PARADISE,2020-09-27 04:02:00,PARADISE,2020-09-27 04:02:00,True
+2020-09-23,,9.8,25.3,0.0,,,7.3,,,,PARADISE,2020-09-27 04:02:00,PARADISE,2020-09-27 04:02:00,True
+2020-09-24,,9.5,25.3,0.0,,,5.8,,,,PARADISE,2020-09-27 04:02:00,PARADISE,2020-09-27 04:02:00,True
+2020-09-25,,9.7,25.7,0.0,,,4.6,,,,PARADISE,2020-09-27 04:02:00,PARADISE,2020-09-27 04:02:00,True
+2020-09-26,,15.6,25.5,0.0,,,6.3,,,,PARADISE,2020-09-27 04:02:00,PARADISE,2020-09-27 04:02:00,True

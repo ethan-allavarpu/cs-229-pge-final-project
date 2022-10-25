@@ -1,0 +1,6 @@
+time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
+2020-09-03,25.2,16.0,35.0,,,,8.5,,,,SPRING GAP,2020-09-08 00:21:00,SPRING GAP,2020-09-08 00:21:00,True
+2020-09-04,26.1,17.0,37.0,,,,2.8,,,,SPRING GAP,2020-09-08 00:21:00,SPRING GAP,2020-09-08 00:21:00,True
+2020-09-05,27.2,18.0,37.0,,,,2.3,,,,SPRING GAP,2020-09-08 00:21:00,SPRING GAP,2020-09-08 00:21:00,True
+2020-09-06,29.5,20.0,42.0,,,,1.7,,,,SPRING GAP,2020-09-08 00:21:00,SPRING GAP,2020-09-08 00:21:00,True
+2020-09-07,30.9,21.0,40.0,,,,12.1,,,,SPRING GAP,2020-09-08 00:21:00,SPRING GAP,2020-09-08 00:21:00,True
