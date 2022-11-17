@@ -10,11 +10,11 @@ get_county <- function(long_lat) {
     "county", fill = TRUE, col = "transparent", plot = FALSE
   )
   county_ids <- sapply(strsplit(counties$names, ":"), function(x) x[1])
-  county_sp <- map2SpatialPolygons(
+  county_sp <- maptools::map2SpatialPolygons(
     counties, IDs = county_ids,
     proj4string = CRS("+proj=longlat +datum=WGS84")
   )
-  spatial_points <- SpatialPoints(
+  spatial_points <- sp::SpatialPoints(
     long_lat, proj4string = CRS("+proj=longlat +datum=WGS84")
   )
   indices <- over(spatial_points, county_sp)
@@ -29,8 +29,8 @@ extract_county <- function(state_county) {
   stringr::str_split(string = state_county, pattern = ",")[[1]][2]
 }
 
-train_x <- readr::read_csv("../data/processed/x_train.csv", col_select = -1)
-train_y <- readr::read_csv("../data/processed/y_train.csv", col_select = -1)
+train_x <- readr::read_csv("data/processed/x_train.csv", col_select = -1)
+train_y <- readr::read_csv("data/processed/y_train.csv", col_select = -1)
 
 long_lat <- train_x %>% select(longitude, latitude)
 counties <- get_county(data.frame(long_lat)) %>%
@@ -59,6 +59,6 @@ outage_plot <- ca_info %>%
   coord_fixed()
 
 # Save PDF file
-pdf("../visuals/outage-by-county.pdf", width = 7, height = 5)
+pdf("visuals/outage-by-county.pdf", width = 7, height = 5)
 invisible(print(outage_plot))
 dev.off()
