@@ -1,9 +1,7 @@
-# cs229-pge-final-project
+# Out For How Long? Predicting the Severity of Planned Power Shutoffs
 
 ## Model Performance
 Updated as of _November 17, 2022_
-
-Best model in **bold** (currently, Random Forest):
 
 | Model                     |Test R-Squared|RMSE          |
 |:--------------------------|-------------:|-------------:|
@@ -16,6 +14,9 @@ Best model in **bold** (currently, Random Forest):
 |**Random Forest**          | **0.767109** |**762.484073**|
 |KNN                        | 0.726484     |   826.315377 |
 
+The best model is listed in **bold** (currently, Random Forest).
+
+The models are listed in the order in which they were created (earliest to latest).
 
 ## Additional Links
 
