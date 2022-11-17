@@ -6,10 +6,13 @@ library(tidyverse)
 
 # Extract county from latitude and longitude ----
 get_county <- function(long_lat) {
-  counties <- maps::map("county", fill = TRUE, col = "transparent", plot = FALSE)
+  counties <- maps::map(
+    "county", fill = TRUE, col = "transparent", plot = FALSE
+  )
   county_ids <- sapply(strsplit(counties$names, ":"), function(x) x[1])
   county_sp <- map2SpatialPolygons(
-    counties, IDs = county_ids, proj4string = CRS("+proj=longlat +datum=WGS84")
+    counties, IDs = county_ids,
+    proj4string = CRS("+proj=longlat +datum=WGS84")
   )
   spatial_points <- SpatialPoints(
     long_lat, proj4string = CRS("+proj=longlat +datum=WGS84")
@@ -23,7 +26,7 @@ extract_county <- function(state_county) {
   if (is.na(state_county)) {
     return(state_county)
   }
-  stringr::str_split(string = state_county, pattern = ',')[[1]][2]
+  stringr::str_split(string = state_county, pattern = ",")[[1]][2]
 }
 
 train_x <- readr::read_csv("../data/processed/x_train.csv", col_select = -1)
@@ -36,7 +39,7 @@ counties <- get_county(data.frame(long_lat)) %>%
 
 # Total Amount of Outage Time (minutes) by County ----
 ca_counties <- map_data("county") %>% filter(region == "california")
-county_outage <- dplyr::bind_cols('county' = counties, train_y) %>%
+county_outage <- dplyr::bind_cols("county" = counties, train_y) %>%
   group_by(county) %>%
   summarise(stat = sum(time_out_min))
 
