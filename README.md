@@ -5,16 +5,16 @@ In recent years, California has seen an uptick in wildfire frequency and severit
 ## Model Performance
 Updated as of _November 17, 2022_
 
-| Model                     |Test R-Squared|RMSE          |
-|:--------------------------|-------------:|-------------:|
-|Simple Linear Regression   |	0.002391     |  1578.099447 |
-|Multiple Linear Regression |	0.465563     |  1155.053925 |
-|XGBoost (Preliminary)      |	0.576786     |  1027.860530 |
-|Ridge                      |	0.487803     |  1130.766247 |
-|LASSO                      |	0.489623     |  1128.755645 |
-|Elastic Net                |	0.481117     |  1138.122057 |
-|**Random Forest**          | **0.767109** |**762.484073**|
-|KNN                        | 0.726484     |   826.315377 |
+| Model                     |Test R-Squared|RMSE           |
+|:--------------------------|-------------:|--------------:|
+|Simple Linear Regression   |	  0.002391   |  1578.099447  |
+|Multiple Linear Regression |	  0.465563   |  1155.053925  |
+|XGBoost (Preliminary)      |	  0.576786   |  1027.860530  |
+|Ridge                      |	  0.487803   |  1130.766247  |
+|LASSO                      |	  0.489623   |  1128.755645  |
+|Elastic Net                |	  0.481117   |  1138.122057  |
+|**Random Forest**          | **0.767109** | **762.484073**|
+|KNN                        |   0.726484   |   826.315377  |
 
 The best model is listed in **bold** (currently, Random Forest).
 
