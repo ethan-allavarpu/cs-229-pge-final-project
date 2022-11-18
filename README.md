@@ -5,20 +5,24 @@ In recent years, California has seen an uptick in wildfire frequency and severit
 ## Model Performance
 Updated as of _November 17, 2022_
 
+0.530090	1083.081942
+1	LASSO	0.530090	1087.725956
+2	Elastic Net	0.526052	1087.725956
+
 | Model                     |Test R-Squared|RMSE           |
 |:--------------------------|-------------:|--------------:|
 |Simple Linear Regression   |	  0.002391   |  1578.099447  |
 |Multiple Linear Regression |	  0.465563   |  1155.053925  |
 |XGBoost (Preliminary)      |	  0.576786   |  1027.860530  |
-|Ridge                      |	  0.487803   |  1130.766247  |
-|LASSO                      |	  0.489623   |  1128.755645  |
-|Elastic Net                |	  0.481117   |  1138.122057  |
-|**Random Forest**          | **0.767109** | **762.484073**|
-|KNN                        |   0.726484   |   826.315377  |
+|Ridge                      |	  0.530090   |  1083.081942  |
+|LASSO                      |	  0.526052   |  1087.725956  |
+|Elastic Net                |	  0.526052   |  1087.725956  |
+|**Random Forest**          | **0.765664** | **764.845235**|
+|KNN                        |   0.715034   |   843.433910  |
 
 The best model is listed in **bold** (currently, Random Forest).
 
-The models are listed in the order in which they were created (earliest to latest).
+The models are listed in the order in which they were created (earliest to latest). We note that, when performing cross-validation, the Elastic Net ended up selected the same model as LASSO.
 
 ## Additional Links
 
