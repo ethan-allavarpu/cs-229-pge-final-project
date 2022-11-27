@@ -3,7 +3,7 @@
 In recent years, California has seen an uptick in wildfire frequency and severity as a result of climate change. Pacific Gas & Electric (PG&E) has had many lawsuits filed against them because of the role their power lines play in contributing to wildfire events. As a result, PG&E began to implement Public Safety Power Shutoff (PSPS) events to reduce the likelihood of their starting or contributing to wildfire events. These events, however, disrupt lives. We want to predict the severity of these events (with  shutoff length as a proxy) based on weather conditions (e.g., temperature, wind), geographic location, and census data (e.g., population, income) given that PG&E planned a shutoff.
 
 ## Model Performance
-Updated as of _November 17, 2022_
+Updated as of _November 26, 2022_
 
 0.530090	1083.081942
 1	LASSO	0.530090	1087.725956
@@ -17,8 +17,9 @@ Updated as of _November 17, 2022_
 |Ridge                      |	  0.530090   |  1083.081942  |
 |LASSO                      |	  0.526052   |  1087.725956  |
 |Elastic Net                |	  0.526052   |  1087.725956  |
-|**Random Forest**          | **0.765664** | **764.845235**|
+|Random Forest              |   0.765664   |   764.845235  |
 |KNN                        |   0.715034   |   843.433910  |
+|**XGBoost**                | **0.768208** | **760.681100**|
 
 The best model is listed in **bold** (currently, Random Forest).
 
