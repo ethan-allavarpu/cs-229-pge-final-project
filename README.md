@@ -13,11 +13,11 @@ Updated as of _November 26, 2022_
 |Ridge                      |	  0.530090   |  1083.081942  |   826.343620  |
 |LASSO                      |	  0.526052   |  1087.725956  |   826.844061  |
 |Elastic Net                |	  0.526052   |  1087.725956  |   826.844061  |
-|Random Forest              |   0.766858   |   762.893741  |   500.366251  |
+|**Random Forest**          | **0.766858** | **762.893741**| **500.366251**|
 |KNN                        |   0.726484   |   826.315377  |   544.658185  |
-|**XGBoost**                | **0.768380** | **760.399548**|   519.912074  |
+|**XGBoost**                | **0.768380** | **760.399548**| **519.912074**|
 
-The best model is listed in **bold**.
+The best model(s) is (are) listed in **bold**.
 
 The models are listed in the order in which they were created (earliest to latest). We note that, when performing cross-validation, the Elastic Net ended up selected the same model as LASSO.
 
