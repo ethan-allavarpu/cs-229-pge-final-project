@@ -1,0 +1,6 @@
+Loss: 796.3245849609375, Params: n_layers: 2
+          n_hidden_units: [47, 72]
+          lr: 0.003220255014661397
+          n_epochs: 3584372
+          act_function: ReLU()
+          dropout: 0.003755084817386567
