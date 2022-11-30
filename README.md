@@ -4,7 +4,7 @@ In recent years, California has seen an uptick in wildfire frequency and severit
 
 ## Model Performance
 
-Updated as of _November 29, 2022_
+Updated as of _November 30, 2022_
 
 | Model                     |Test R-Squared|RMSE           |MAE            |
 |:--------------------------|-------------:|--------------:|--------------:|
@@ -17,7 +17,7 @@ Updated as of _November 29, 2022_
 |**Random Forest**          | **0.766858** | **762.893741**| **500.366251**|
 |KNN                        |   0.726484   |   826.315377  |   544.658185  |
 |**XGBoost**                | **0.768380** | **760.399548**| **519.912074**|
-|Neural Network             |   0.752182   |   854.431078  |   597.640755  |
+|Neural Network             |   0.615241   |   831.422925  |   583.833951  |
 
 The best model(s) is (are) listed in **bold**.
 
