@@ -73,8 +73,7 @@ scaled_test_x = scaler.transform(rel_x_test)
 param_grid = { 
     'n_estimators': [100, 200, 300, 400],
     'max_features': [1 / 3, 'sqrt', 'log2'],
-    'max_depth': [5, 6, 7, 8, 9, 10],
-    'criterion': ['squared_error', 'absolute_error', 'poisson']
+    'max_depth': [5, 6, 7, 8, 9, 10]
 }
 grid_size = np.array([len(value) for value in param_grid.values()]).prod()
 
@@ -82,7 +81,7 @@ grid_size = np.array([len(value) for value in param_grid.values()]).prod()
 # In[6]:
 
 
-rf = RandomForestRegressor(random_state=6)
+rf = RandomForestRegressor(criterion='squared_error', random_state=6)
 # Try 25% of all possible combinations
 # This code chunk takes ~15 minutes to run on my laptop
 # Optimize hyperparameters
@@ -110,7 +109,7 @@ best_rf = RandomForestRegressor(
     n_estimators=rf_cv.best_params_['n_estimators'],
     max_features=rf_cv.best_params_['max_features'],
     max_depth=rf_cv.best_params_['max_depth'],
-    criterion=rf_cv.best_params_['criterion'],
+    criterion='squared_error',
     random_state=6
 )
 best_rf.fit(scaled_train_x, y_train)
