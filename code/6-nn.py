@@ -1,18 +1,20 @@
-# Python script taken from 6-nn.ipynb
+#!/usr/bin/env python
+# coding: utf-8
 
+# In[2]:
 import numpy as np
 import pandas as pd
 import re
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import optuna
 import torch
 from torch.autograd import Variable
-from torchviz import make_dot
 
 torch.manual_seed(0)
 
+# In[3]:
 # Loading dataset
 x_train = pd.read_csv(
     "../data/processed/x_train_w_OHE.csv", index_col=0, dtype=str
@@ -35,6 +37,7 @@ zip_cols = x_train.columns[
 ]
 
 
+# In[4]:
 def get_correct_types_x(df, numeric_cols):
     for col in ['deenergize_time', 'restoration_time']:
         df[col] = pd.to_datetime(df[col], format='%Y-%m-%d %H:%M:%S')
@@ -43,7 +46,7 @@ def get_correct_types_x(df, numeric_cols):
     return df
 
 
-# Only include numerical columns as input to neural net
+# Only pick out numeric columns
 numeric_cols = [
     'hftd_tier', 'total_affected', 'residential_affected',
     'longitude', 'latitude', 'total_pop', 'median_age', 'median_income',
@@ -58,27 +61,31 @@ rel_x_train = x_train[numeric_cols]
 rel_x_valid = x_valid[numeric_cols]
 rel_x_test = x_test[numeric_cols]
 
-# Scale data to avoid feature scale imbalance
+# Scale numeric columns to prevent feature dominance
 scaler = StandardScaler()
 scaler.fit(rel_x_train)
 scaled_x_train = scaler.transform(rel_x_train)
 scaled_x_valid = scaler.transform(rel_x_valid)
 scaled_x_test = scaler.transform(rel_x_test)
 
-# Defining the Neural Network
+# In[20]:
+# Defining the Neural Network Model
 
 
 class base_model(torch.nn.Module):
 
     def __init__(self, n_hidden_layers, n_hidden_units, p=0.1, activation=torch.nn.ReLU()):
         super(base_model, self).__init__()
+        # Handle variable number of layers
         if n_hidden_layers == 0:
+            # If 0 hidden layers, then only have 1 layer going from input to single node
             self.linears = torch.nn.ModuleList([
                 torch.nn.Linear(scaled_x_train.shape[1], 1)
             ])
             self.activation = activation
             self.dropout = torch.nn.Dropout(p)
         else:
+            # If >= 1 hidden layer, then specify # of hidden units per layer
             assert len(n_hidden_units) == n_hidden_layers
             self.layers = []
 
@@ -90,6 +97,7 @@ class base_model(torch.nn.Module):
                     curr_layer = torch.nn.Linear(
                         n_hidden_units[layer - 1], n_units)
                 self.layers.append(curr_layer)
+            # Add layers to module list
             self.layers.append(torch.nn.Linear(n_hidden_units[-1], 1))
             self.linears = torch.nn.ModuleList(self.layers)
             self.activation = activation
@@ -101,9 +109,8 @@ class base_model(torch.nn.Module):
         return x
 
 
+# In[21]:
 # Hyper-parameter Optimization using Optuna
-
-# Put on GPU if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Define an objective function to be maximized.
@@ -114,6 +121,7 @@ def objective(trial):
     # Suggest values of the hyperparameters using a trial object.
     n_layers = trial.suggest_int('n_layers', 0, 4)
     n_hidden_units = [0] * n_layers
+    print(n_layers)
     for i in range(n_layers):
         n_hidden_units[i] = trial.suggest_int(f"n_h_{i}", 1, 50)
     lr = trial.suggest_float("lr", 1e-5, 5e-1, log=True)
@@ -128,22 +136,25 @@ def objective(trial):
           n_epochs: {n_epochs}
           act_function: {activation_functions[act_idx]}
           dropout: {dropout_p}"""
+    print(params)
 
+    # Move data to tensors
     x = torch.from_numpy(scaled_x_train).float().to(device)
     y = torch.from_numpy(y_train.values.reshape(-1, 1)).float().to(device)
-
     inputs = Variable(x)
     targets = Variable(y)
 
-    model = base_model(n_layers, n_hidden_units, p=dropout_p,
-                       activation=activation_functions[act_idx])
-    model.to(device)
-    optimizer = torch.optim.Adagrad(model.parameters(), lr=lr)
+    # Define model, optimizer with hyperparameters
+    base = base_model(n_layers, n_hidden_units, p=dropout_p,
+                      activation=activation_functions[act_idx])
+    base.to(device)
+    optimizer = torch.optim.Adagrad(base.parameters(), lr=lr)
     loss_func = torch.nn.MSELoss()
     prev_loss = torch.from_numpy(np.array([0])).to(device)
 
+    # Train model for n_epochs
     for i in range(n_epochs):
-        prediction = model(inputs)
+        prediction = base(inputs)
         loss = loss_func(prediction, targets)
         if i % 1000 == 0:
             print(loss)
@@ -154,6 +165,7 @@ def objective(trial):
         loss.backward()
         optimizer.step()
 
+    # Calculate validation loss
     valid_x = Variable(torch.from_numpy(scaled_x_valid).float()).to(device)
     valid_y = Variable(torch.from_numpy(
         y_valid.values.reshape(-1, 1)).float()).to(device)
@@ -161,22 +173,36 @@ def objective(trial):
     loss = loss_func(valid_predictions, valid_y)
     print(f"Final valid loss: {loss}")
     print("#################")
+    if loss < 1000000:
+        with open(f"nn_hpo/run_2/{time.time()}.txt", "w+") as f:
+            f.write(f"Loss: {np.sqrt(loss.cpu().detach().numpy())}\n")
+            f.write(params)
+    # Return validation RMSE for optuna to minimize
     return np.sqrt(loss.cpu().detach().numpy())
 
 
-# Create a study object and optimize the objective function.
+# In[ ]:
+# Create a study object and minimize RMSE
+torch.manual_seed(0)
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=400)
+study.optimize(objective, n_trials=100)
+# Save best trial with parameters
 pd.DataFrame.from_dict({"value": study.best_trial.values, "params": str(
-    study.best_trial.params)}).to_csv("nn_hpo/run_1.csv", index=False)
+    study.best_trial.params)}).to_csv("nn_hpo/run_4.csv", index=False)
 
 # fig = optuna.visualization.plot_optimization_history(study)
 # fig.show()
-# fig.write_image("nn_hpo/run_3.png")
+# fig.write_image("gdrive/MyDrive/CS229_Final_Project/nn_hpo/run_1.png")
 
-# Baseline Model training script
+# In[22]:
+# Running best models on test data
+# Load best hyperparams
+best_params = pd.read_csv("nn_hpo/run_1.csv")
+best_params_dict = eval(best_params["params"].values[0])
+best_params_dict
 
-
+# In[ ]:
+# Baseline Model
 x = torch.from_numpy(scaled_x_train).float()
 y = torch.from_numpy(y_train.values.reshape(-1, 1)).float()
 
@@ -197,6 +223,8 @@ for i in range(100000):
     loss_base.backward()
     optimizer.step()
 
+
+# In[24]:
 # Baseline loss
 test_x = Variable(torch.from_numpy(scaled_x_test).float())
 test_y = Variable(torch.from_numpy(y_test.values.reshape(-1, 1)).float())
@@ -205,25 +233,17 @@ loss_base = loss_func(test_predictions_base, test_y)
 baseline_rmse = np.sqrt(loss_base.detach().numpy())
 baseline_rmse
 
-# Running best models on test data
-
-
-# Load best hyperparams
-best_params = pd.read_csv("nn_hpo/run_1.csv")
-best_params_dict = eval(best_params["params"].values[0])
-best_params_dict
-
+# In[ ]:
 # Model with best hyperparameters
-
 x = torch.from_numpy(scaled_x_train).float()
 y = torch.from_numpy(y_train.values.reshape(-1, 1)).float()
 
 inputs = Variable(x)
 targets = Variable(y)
 
+# Load model, optimizer with best hyperparameters
 best = base_model(best_params_dict["n_layers"],
                   [46, 96],
-                  # best_params_dict["n_hidden_units"],
                   # activation=best_params_dict["act_function"],
                   p=best_params_dict["dropout"]
                   )
@@ -240,15 +260,15 @@ for i in range(best_params_dict["n_epochs"]):
     loss.backward()
     optimizer.step()
 
+
+# In[26]:
 # Best model loss
 test_predictions = best(test_x)
 loss = loss_func(test_predictions, test_y)
 best_rmse = np.sqrt(loss.detach().numpy())
 best_rmse
 
-# Model Visualization
-make_dot(test_predictions, params=dict(best.named_parameters()))
-
+# In[27]:
 # Evaluation Metrics
 
 
@@ -256,10 +276,17 @@ def calc_test_r2(pred_vals, true_vals, baseline_rmse):
     sse = mean_squared_error(pred_vals, true_vals) * len(true_vals)
     sst = (baseline_rmse ** 2) * len(true_vals)
     return (
-        1 - sse / sst, np.sqrt(sse / len(true_vals)),
-        mean_absolute_error(pred_vals, true_vals)
+        1 - sse / sst,
+        np.sqrt(sse / len(true_vals)),
+        mean_absolute_error(pred_vals, true_vals),
+        mean_absolute_percentage_error(pred_vals, true_vals)
     )
 
 
-calc_test_r2(test_predictions.detach().numpy(),
-             y_test.values.reshape(-1, 1), np.sqrt(np.var(y_test)))
+# In[28]:
+test_r2, rmse, mae, mape = calc_test_r2(
+    test_predictions.detach().numpy(), y_test.values.reshape(-1, 1), np.sqrt(np.var(y_test)))
+print('Test R-Squared:', test_r2)
+print('RMSE:', rmse)
+print('MAE:', mae)
+print('MAPE:', mape)
