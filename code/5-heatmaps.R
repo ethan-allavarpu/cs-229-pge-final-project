@@ -42,27 +42,28 @@ counties <- get_county(data.frame(long_lat)) %>%
   purrr::map(extract_county) %>%
   unlist()
 
-# Total Amount of Outage Time (minutes) by County ----
+# Total Amount of Shutoff Time (minutes) by County ----
 ca_counties <- map_data("county") %>% filter(region == "california")
 # Calculate total time, grouped by county
-county_outage <- dplyr::bind_cols("county" = counties, train_y) %>%
+county_shutoff <- dplyr::bind_cols("county" = counties, train_y) %>%
   group_by(county) %>%
   summarise(stat = sum(time_out_min))
 
-ca_info <- left_join(ca_counties, county_outage, by = c("subregion" = "county"))
+ca_info <- left_join(ca_counties, county_shutoff,
+                     by = c("subregion" = "county"))
 
-outage_plot <- ca_info %>%
+shutoff_plot <- ca_info %>%
   # Grid to plot
   ggplot(aes(x = long, y = lat, group = group, fill = stat)) +
   # County borders
   geom_polygon(color = "black") +
-  # Color based on total outage time
+  # Color based on total shutoff time
   scale_fill_gradient(low = rgb(0.5, 0, 0, alpha = 0),
                       high = rgb(0.33, 0, 0),
-                      limits = c(0, max(county_outage$stat, na.rm = TRUE)),
+                      limits = c(0, max(county_shutoff$stat, na.rm = TRUE)),
                       na.value = "white",
-                      name = "Total Outage Time\n(Minutes)") +
-  labs(title = "Total Outage Time (Minutes) for PSPS Events by County",
+                      name = "Total Shutoff Time\n(Minutes)") +
+  labs(title = "Total Shutoff Time (Minutes) for PSPS Events by County",
        x = "Longitude", y = "Latitude") +
   theme_minimal() +
   # Adjust text sizing
@@ -73,6 +74,6 @@ outage_plot <- ca_info %>%
   coord_fixed()
 
 # Save PDF file
-pdf("visuals/outage-by-county.pdf", width = 7, height = 5)
-invisible(print(outage_plot))
+pdf("visuals/shutoff-by-county.pdf", width = 7, height = 5)
+invisible(print(shutoff_plot))
 dev.off()
