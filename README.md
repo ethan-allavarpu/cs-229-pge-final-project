@@ -25,19 +25,19 @@ To construct the models, you can run the files in the `code` folder in numeric o
 ## Model Performance
 
 
-| Model                     |Test R-Squared|RMSE           |MAE            |
-|:--------------------------|-------------:|--------------:|--------------:|
-|Simple Linear Regression   |   0.002391   |  1578.099447  |  1157.988578  |
-|Multiple Linear Regression |   0.465563   |  1155.053925  |   882.595626  |
-|XGBoost (Preliminary)      |   0.576786   |  1027.860530  |   750.430526  |
-|Ridge                      |   0.496509   |  1121.114728  |   854.537449  |
-|LASSO                      |   0.498145   |  1119.291615  |   852.692513  |
-|Elastic Net                |   0.490046   |  1128.287164  |   860.886639  |
-|**Random Forest**          | **0.779628** | **741.706667**| **487.372001**|
-|KNN                        |   0.731378   |   818.888812  |   537.441052  |
-|**XGBoost**                | **0.784097** | **734.146636**| **497.710402**|
-|Neural Network             |   0.708749   |   852.683707  |   600.820038  |
+| Model                     |Test R-Squared|RMSE           |
+|:--------------------------|-------------:|--------------:|
+|Simple Linear Regression   |   0.002391   |  1578.099447  |
+|Multiple Linear Regression |   0.465563   |  1155.053925  |
+|XGBoost (Preliminary)      |   0.576786   |  1027.860530  |
+|Ridge                      |   0.496509   |  1121.114728  |
+|LASSO                      |   0.498145   |  1119.291615  |
+|Elastic Net                |   0.490046   |  1128.287164  |
+|Random Forest              |   0.779628   |   741.706667. |
+|KNN                        |   0.731378   |   818.888812  |
+|**XGBoost**                | **0.784097** | **734.146636**|
+|Neural Network             |   0.708749   |   852.683707  |
 
-The best model(s) is (are) listed in **bold**.
+The best model is **XGBoost** (with Random Forest just behind).
 
 The models are listed in the order in which they were created (earliest to latest).
