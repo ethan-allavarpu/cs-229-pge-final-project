@@ -1,6 +1,6 @@
 time,tavg,tmin,tmax,prcp,snow,wdir,wspd,wpgt,pres,tsun,circuit_name,deenergize_time,source_circuit_name,source_deenergize_time,approximated
 2020-09-02,,9.1,30.0,1.4,,,4.0,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
 2020-09-03,26.2,6.8,20.0,0.0,,,2.8,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
-2020-09-04,27.5,7.7,23.4,0.0,,,7.1,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
+2020-09-04,27.4,7.7,23.4,0.0,,,7.1,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
 2020-09-05,,6.6,26.8,0.0,,,6.7,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
 2020-09-06,,10.9,22.0,0.0,,,6.1,,,,BIG BEND,2020-09-07 15:34:00,BIG BEND,2020-09-07 15:34:00,True
