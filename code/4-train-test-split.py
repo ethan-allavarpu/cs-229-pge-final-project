@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 psps = pd.read_csv(
     '../data/processed/processed-shutoffs-weather.csv', dtype=str
 ).dropna()
+# Proper datetime conversion
 for col in ['deenergize_time', 'restoration_time']:
     psps[col] = pd.to_datetime(psps[col], format='%Y-%m-%d %H:%M:%S')
 numeric_cols = [
@@ -23,14 +24,18 @@ numeric_cols = [
     'wspd_d-4', 'tmin_d-3', 'tmax_d-3', 'wspd_d-3', 'tmin_d-2', 'tmax_d-2',
     'wspd_d-2', 'tmin_d-1', 'tmax_d-1', 'wspd_d-1'
 ]
+# Proper float conversion
 for col in numeric_cols:
     psps[col] = psps[col].astype(float)
+# Add day in year column (for the possibility of cyclical patterns/fire season)
 psps['day_in_year'] = [int(day) for day in psps.deenergize_time.dt.day_of_year]
 
 
 # In[3]:
 
 
+# Constant train-test split for reproducibility
+# 80-20 train-test
 x_train, x_test, y_train, y_test = train_test_split(
     psps.drop(columns='time_out_min'),
     psps.time_out_min,

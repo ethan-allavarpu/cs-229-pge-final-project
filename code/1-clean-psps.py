@@ -14,10 +14,12 @@ warnings.filterwarnings('ignore')
 
 # In[2]:
 
-# Standardize substation names
+
 substations = pd.read_csv('../data/raw/California_Electric_Substations.csv',
                           usecols=['Name', 'ZIP_CODE', 'COUNTY', 'Lon', 'Lat'], dtype='str')
+# Standardize names for dropping
 substations.Name = [stn.upper() for stn in substations.Name]
+# Don't include unknown names or ones that start with numbers
 substations = substations[substations.Name != 'UNKNOWN'].reset_index(drop=True)
 substations = substations[
     [re.match('^\d', name) is None for name in substations.Name]
@@ -29,21 +31,25 @@ substations
 
 
 def clean_df(psps, start_datetype, end_datetype):
-    # Standardize column names
+    """
+    Clean and standardize data frame inputs so they can later be joined.
+    Standardize column names, column types and imputation (if necessary)
+    """
+    # Standardize columns, column names
     if 'Distribution / Transmission' in psps.columns:
         psps['Distribution / Transmission'] = [
             x.upper() for x in psps['Distribution / Transmission']
         ]
         psps = psps[psps['Distribution / Transmission'] == 'DISTRIBUTION']
         psps.drop(columns='Distribution / Transmission', inplace=True)
-    # Clean circuit names
+    # Clean circuit name
     cleaned_circuit = [
         re.findall('.*?(?=\s\d{4,}\*?)', str(circuit))[0].strip()
         if len(re.findall('.*?(?=\s\d{4,}\*?)', str(circuit))) > 0 else circuit
         for circuit in psps['Circuit Name']
     ]
     psps['Circuit Name'] = cleaned_circuit
-    # Clean fire risk tiers
+    # Convert fire risk to integer
     cleaned_hftd = [
         int(max(re.findall('\d', str(hftd))))
         if len(re.findall('\d', str(hftd))) > 0 else 0
@@ -51,11 +57,12 @@ def clean_df(psps, start_datetype, end_datetype):
     ]
     psps['HFTD Tier'] = cleaned_hftd
     psps.columns = [str(col_name).strip() for col_name in psps.columns]
+    # Shorten column names
     shorter_names = [
         re.sub(' Customers$', '', str(col_name)) for col_name in psps.columns
     ]
     psps.columns = shorter_names
-    # Standardize column names
+    # Standardize column names further
     psps.rename(columns={
         'Start Date and\rTime': 'DeEnergization Date and Time',
         'Start Date and Time': 'DeEnergization Date and Time',
@@ -71,7 +78,7 @@ def clean_df(psps, start_datetype, end_datetype):
     fixed_communities = [
         re.sub('[\r\n\s]+', ' ', str(comm)) for comm in psps['Key Communities']
     ]
-    # Get the datetime-variables
+    # Extract datetime forms
     def get_times(str_time, date_type):
         fixed_time = re.sub('[\r\n\s]+', ' ', str(str_time))
         try:
@@ -96,10 +103,12 @@ def clean_df(psps, start_datetype, end_datetype):
     ]
     psps['deenergize_time'] = start_time
     psps['restoration_time'] = end_time
+    # Get length of shutoff
     psps['time_out_min'] = (
         (psps.restoration_time - psps.deenergize_time) / pd.Timedelta('1m')
     )
     psps['Key Communities'] = fixed_communities
+    # Convert columns to floats
     for col in ['HFTD Tier', 'Total', 'Residential']:
         psps[col] = [float(re.sub(',', '', str(val))) for val in psps[col]]
     psps = psps[[    
@@ -110,6 +119,7 @@ def clean_df(psps, start_datetype, end_datetype):
         'circuit_name', 'deenergize_time', 'restoration_time', 'time_out_min', 'key_communities', 'hftd_tier', 'total_affected', 'residential_affected'
     ]
     # Fill in potential missing values
+    # Fill in missingness with means for same circuit
     def fill_values(missing_obs, non_missing_data):
         temp_non_missing = copy.deepcopy(non_missing_data)
         temp_non_missing['cleaned_circuit'] = [
@@ -127,6 +137,7 @@ def clean_df(psps, start_datetype, end_datetype):
             missing_obs.key_communities = ', '.join(rel_circ.key_communities)
         return missing_obs
     missing = psps[psps.deenergize_time.isna()]
+    # Missing if too early datetime variable
     if len(missing) > 0:
         non_missing = psps[psps.deenergize_time > pd.to_datetime('2000-01-01')]
         psps = pd.concat(
@@ -140,14 +151,20 @@ def clean_df(psps, start_datetype, end_datetype):
 
 # In[4]:
 
-# Treat yearly data differently
-# Each year has a slightly different format 
+
+# Cleaning dataframe simple for 2020-2021 data frames
 def clean_df_20_21(file_path, start_datetype, end_datetype):
+    """
+    Read in and clean dataframes from 2020-2021
+    """
     psps = pd.read_csv(file_path, dtype=str)
     return clean_df(psps, start_datetype, end_datetype)
-
-# Have to merge files for 2018-2019 before cleaning them
+# Need to join two separate dataframes for 2018-2019 instances
 def clean_df_18_19(psps_date, start_datetype, end_datetype):
+    """
+    Join separate data frames in 2018-2019 to link customers and circuits
+    before cleaning the data frame
+    """
     circuits = pd.read_csv(
         '../data/raw/PSPS-{}-circuits.csv'.format(psps_date), dtype=str
     ).rename(columns={'Circuit': 'Circuit Name'})
@@ -164,6 +181,7 @@ def clean_df_18_19(psps_date, start_datetype, end_datetype):
         re.sub('\s(?=\d)', '', re.sub('\*', '', re.sub('[\r\n]+', '', circuit)))
         for circuit in customers['Circuit Name']
     ]
+    # Join on circuits between customer and outage data
     psps = pd.merge(circuits, customers, how='outer', on='Circuit Name')
     psps = psps[[
         re.search('LINE$', circuit) is None
@@ -174,7 +192,8 @@ def clean_df_18_19(psps_date, start_datetype, end_datetype):
 
 # In[5]:
 
-# Read in 2018-2019 files
+
+# Datetime format for 2018-2019
 dates_18_19 = [
     '10.14.18', '06.08.19', '09.23.19', '10.05.19',
     '10.09.19', '10.23.19', '10.26.19', '11.20.19'
@@ -193,6 +212,7 @@ data_input = [
     for i in range(len(dates_18_19))
 ]
 
+# Combine 2018-2019 outages into single dataframe
 data_18_19 = pd.concat(
     [clean_df_18_19(file[0], file[1], file[2]) for file in data_input],
     axis=0
@@ -202,6 +222,7 @@ data_18_19 = pd.concat(
 # In[6]:
 
 
+# Datetime format for 2020-2021 outages
 file_names = [
     '../data/raw/PSPS-{}-circuits.csv'.format(dt)
     for dt in [
@@ -221,7 +242,7 @@ end_formats = [
 ]
 data_input = [(file_names[i], start_formats[i], end_formats[i]) for i in range(len(file_names))]
 
-# Read in 2020-2021 files
+# Combine 2020-2021 outages
 data_20_21 = pd.concat(
     [clean_df_20_21(file[0], file[1], file[2]) for file in data_input],
     axis=0
@@ -230,8 +251,9 @@ data_20_21 = pd.concat(
 
 # In[7]:
 
-# Subset to valid results
+
 data = pd.concat([data_18_19, data_20_21], axis=0)
+# Remove missing data
 data = data[
         (data.restoration_time > '2000-01-01') &
         (data.deenergize_time > '2000-01-01') &
@@ -242,11 +264,26 @@ data = data[
 
 # In[8]:
 
-# Use fuzzymatching to assign the "correct" substation (for joining to weather)
+
+data
+
+
+# In[9]:
+
+
+# Fuzzymatching to link to substation
 def most_similar_station(circuit, stns, thresh=80):
+    """
+    Return the matching substation for a given circuit
+    Fuzzy-matching to see similarity scores (minimum of thresh)
+    
+    circuit is circuit name, stns is dataframe of stations, thresh is minimum
+    value for matching
+    """
     circuit = re.sub('\.', '', circuit)
     circuit = re.sub(' NO', '', circuit)
     circuit = re.sub('\d', '', circuit).strip()
+    # Use fuzzymatching ratio to look for most similar
     sim_scores =[
         (
             fuzz.token_sort_ratio(
@@ -258,14 +295,16 @@ def most_similar_station(circuit, stns, thresh=80):
         for _, stn in stns.iterrows()
     ]
     max_score = max([scores[0] for scores in sim_scores])
+    # Need most similar score to be at least of value thresh (80%)
     if max_score < thresh:
         return ('Default', None, None, None)
     return [scores[1:] for scores in sim_scores if scores[0] == max_score][0]
 
 
-# In[9]:
+# In[10]:
 
 
+# This cell is the longest to run (about 5 minutes)
 unique_circuits = data['circuit_name'].unique()
 closest_substation = {
     circuit: most_similar_station(circuit, substations)
@@ -273,9 +312,10 @@ closest_substation = {
 }
 
 
-# In[10]:
+# In[11]:
 
-# Unpack zip, latitude, longitude
+
+# Add substation data (location) to dataframe
 zips = [closest_substation[circuit][1] for circuit in data['circuit_name']]
 longs = [closest_substation[circuit][2] for circuit in data['circuit_name']]
 lats = [closest_substation[circuit][3] for circuit in data['circuit_name']]
@@ -285,9 +325,9 @@ data['latitude'] = lats
 data.info()
 
 
-# In[11]:
+# In[12]:
 
-# Write to temporary file for editing outside repo
+
 data.to_csv('../data/processed/temp-shutoffs.csv')
 # Write missing data to missing data file
 data[data.zip_code.isnull()].to_csv('../data/processed/missing-zips.csv')

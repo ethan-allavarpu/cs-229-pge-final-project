@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
+
+
 import numpy as np
 import pandas as pd
 import re
@@ -14,8 +16,12 @@ from torch.autograd import Variable
 
 torch.manual_seed(0)
 
-# In[3]:
-# Loading dataset
+
+# ## Loading dataset
+
+# In[2]:
+
+
 x_train = pd.read_csv(
     "../data/processed/x_train_w_OHE.csv", index_col=0, dtype=str
 )
@@ -37,14 +43,15 @@ zip_cols = x_train.columns[
 ]
 
 
-# In[4]:
+# In[3]:
+
+
 def get_correct_types_x(df, numeric_cols):
     for col in ['deenergize_time', 'restoration_time']:
         df[col] = pd.to_datetime(df[col], format='%Y-%m-%d %H:%M:%S')
     for col in numeric_cols:
         df[col] = df[col].astype(float)
     return df
-
 
 # Only pick out numeric columns
 numeric_cols = [
@@ -68,8 +75,10 @@ scaled_x_train = scaler.transform(rel_x_train)
 scaled_x_valid = scaler.transform(rel_x_valid)
 scaled_x_test = scaler.transform(rel_x_test)
 
-# In[20]:
-# Defining the Neural Network Model
+
+# ## Defining the Neural Network Model
+
+# In[10]:
 
 
 class base_model(torch.nn.Module):
@@ -109,13 +118,14 @@ class base_model(torch.nn.Module):
         return x
 
 
-# In[21]:
-# Hyper-parameter Optimization using Optuna
+# ## Hyper-parameter Optimization using Optuna
+
+# In[5]:
+
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Define an objective function to be maximized.
-
-
 def objective(trial):
 
     # Suggest values of the hyperparameters using a trial object.
@@ -137,13 +147,13 @@ def objective(trial):
           act_function: {activation_functions[act_idx]}
           dropout: {dropout_p}"""
     print(params)
-
+    
     # Move data to tensors
     x = torch.from_numpy(scaled_x_train).float().to(device)
     y = torch.from_numpy(y_train.values.reshape(-1, 1)).float().to(device)
     inputs = Variable(x)
     targets = Variable(y)
-
+    
     # Define model, optimizer with hyperparameters
     base = base_model(n_layers, n_hidden_units, p=dropout_p,
                       activation=activation_functions[act_idx])
@@ -159,12 +169,12 @@ def objective(trial):
         if i % 1000 == 0:
             print(loss)
         if np.abs(loss.cpu().detach().numpy() - prev_loss.cpu().detach().numpy()) < 1e-8:
-            break
+          break
         prev_loss = loss
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        
     # Calculate validation loss
     valid_x = Variable(torch.from_numpy(scaled_x_valid).float()).to(device)
     valid_y = Variable(torch.from_numpy(
@@ -174,14 +184,16 @@ def objective(trial):
     print(f"Final valid loss: {loss}")
     print("#################")
     if loss < 1000000:
-        with open(f"nn_hpo/run_2/{time.time()}.txt", "w+") as f:
-            f.write(f"Loss: {np.sqrt(loss.cpu().detach().numpy())}\n")
-            f.write(params)
+      with open(f"nn_hpo/run_2/{time.time()}.txt", "w+") as f:
+        f.write(f"Loss: {np.sqrt(loss.cpu().detach().numpy())}\n")
+        f.write(params)
     # Return validation RMSE for optuna to minimize
     return np.sqrt(loss.cpu().detach().numpy())
 
 
 # In[ ]:
+
+
 # Create a study object and minimize RMSE
 torch.manual_seed(0)
 study = optuna.create_study(direction='minimize')
@@ -194,15 +206,23 @@ pd.DataFrame.from_dict({"value": study.best_trial.values, "params": str(
 # fig.show()
 # fig.write_image("gdrive/MyDrive/CS229_Final_Project/nn_hpo/run_1.png")
 
-# In[22]:
-# Running best models on test data
+
+# ## Running best models on test data
+
+# In[6]:
+
+
 # Load best hyperparams
 best_params = pd.read_csv("nn_hpo/run_1.csv")
 best_params_dict = eval(best_params["params"].values[0])
 best_params_dict
 
+
+# ### Baseline Model
+
 # In[ ]:
-# Baseline Model
+
+
 x = torch.from_numpy(scaled_x_train).float()
 y = torch.from_numpy(y_train.values.reshape(-1, 1)).float()
 
@@ -215,16 +235,18 @@ optimizer = torch.optim.Adagrad(base.parameters())
 loss_func = torch.nn.MSELoss()
 
 for i in range(100000):
-    prediction = base(inputs)
-    loss_base = loss_func(prediction, targets)
-    if i % 1000 == 0:
-        print(loss_base)
-    optimizer.zero_grad()
-    loss_base.backward()
-    optimizer.step()
+   prediction = base(inputs)
+   loss_base = loss_func(prediction, targets)
+   if i % 1000 == 0:
+      print(loss_base)
+   optimizer.zero_grad()
+   loss_base.backward()
+   optimizer.step()
 
 
-# In[24]:
+# In[8]:
+
+
 # Baseline loss
 test_x = Variable(torch.from_numpy(scaled_x_test).float())
 test_y = Variable(torch.from_numpy(y_test.values.reshape(-1, 1)).float())
@@ -233,8 +255,12 @@ loss_base = loss_func(test_predictions_base, test_y)
 baseline_rmse = np.sqrt(loss_base.detach().numpy())
 baseline_rmse
 
+
+# ### Model with best hyperparameters
+
 # In[ ]:
-# Model with best hyperparameters
+
+
 x = torch.from_numpy(scaled_x_train).float()
 y = torch.from_numpy(y_train.values.reshape(-1, 1)).float()
 
@@ -242,51 +268,71 @@ inputs = Variable(x)
 targets = Variable(y)
 
 # Load model, optimizer with best hyperparameters
-best = base_model(best_params_dict["n_layers"],
+best = base_model(best_params_dict["n_layers"], 
                   [46, 96],
                   # activation=best_params_dict["act_function"],
                   p=best_params_dict["dropout"]
-                  )
+)
 print(best)
 optimizer = torch.optim.Adagrad(best.parameters(), lr=best_params_dict["lr"])
 loss_func = torch.nn.MSELoss()
 
 for i in range(best_params_dict["n_epochs"]):
-    prediction = best(inputs)
-    loss = loss_func(prediction, targets)
-    if i % 1000 == 0:
-        print(loss)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+   prediction = best(inputs)
+   loss = loss_func(prediction, targets)
+   if i % 1000 == 0:
+      print(loss)
+   optimizer.zero_grad()
+   loss.backward()
+   optimizer.step()
 
 
-# In[26]:
+# In[12]:
+
+
 # Best model loss
 test_predictions = best(test_x)
 loss = loss_func(test_predictions, test_y)
 best_rmse = np.sqrt(loss.detach().numpy())
 best_rmse
 
-# In[27]:
-# Evaluation Metrics
+
+# ## Evaluation Metrics
+
+# In[13]:
 
 
 def calc_test_r2(pred_vals, true_vals, baseline_rmse):
     sse = mean_squared_error(pred_vals, true_vals) * len(true_vals)
     sst = (baseline_rmse ** 2) * len(true_vals)
     return (
-        1 - sse / sst,
+        1 - sse / sst, 
         np.sqrt(sse / len(true_vals)),
         mean_absolute_error(pred_vals, true_vals),
         mean_absolute_percentage_error(pred_vals, true_vals)
     )
 
 
-# In[28]:
+# In[15]:
+
+
+train_r2, rmse, mae, mape = calc_test_r2(
+    prediction.detach().numpy(), y_train.values.reshape(-1, 1), np.sqrt(np.var(y_train)))
+print('Train R-Squared:', train_r2)
+print('RMSE:', rmse)
+print('MAE:', mae)
+print('MAPE:', mape)
+
 test_r2, rmse, mae, mape = calc_test_r2(
     test_predictions.detach().numpy(), y_test.values.reshape(-1, 1), np.sqrt(np.var(y_test)))
 print('Test R-Squared:', test_r2)
 print('RMSE:', rmse)
 print('MAE:', mae)
 print('MAPE:', mape)
+
+
+# In[ ]:
+
+
+
+

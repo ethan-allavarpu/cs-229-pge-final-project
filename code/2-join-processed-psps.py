@@ -16,11 +16,13 @@ warnings.filterwarnings('ignore')
 all_shutoffs = pd.read_csv(
     '../data/processed/temp-shutoffs.csv', index_col=0, dtype=str
 )
+# See which shutoffs are not missing
 nonmissing = all_shutoffs[~all_shutoffs.zip_code.isnull()]
 nonmissing.deenergize_time = nonmissing.deenergize_time.\
     apply(lambda x: pd.to_datetime(x, format='%Y-%m-%d %H:%M:%S'))
 nonmissing.restoration_time = nonmissing.restoration_time.\
     apply(lambda x: pd.to_datetime(x, format='%Y-%m-%d %H:%M:%S'))
+# Write missing ZIP codes to file for external imputation
 updated_missing = pd.read_csv(
     '../data/processed/updated-missing-zips.csv', index_col=0, dtype=str
 ).set_index('index')
@@ -41,6 +43,7 @@ updated_missing.restoration_time = updated_missing.restoration_time.\
 
 
 psps_shutoffs = pd.concat([nonmissing, updated_missing]).reset_index(drop=True)
+# Convert to binary variable
 psps_shutoffs['substn_present'] = psps_shutoffs['Substation Name'] != 'MISSING'
 psps_shutoffs.drop(columns='Substation Name', inplace=True)
 
@@ -56,17 +59,20 @@ for col in ['time_out_min','hftd_tier', 'total_affected',
 # In[5]:
 
 
+# Add census data by ZIP code/ZCTA
 census_data = pd.read_csv('../data/raw/2020-population.csv')
 census_data = census_data[
     [column for column in census_data.columns if re.search('E$', column)]
 ]
-census_pop = census_data[['NAME', 'DP05_0001E', 'DP05_0018E', 'DP05_0037E']] # ZCTA, total population cols, median age, white population
+# ZCTA, total population cols, median age, white population
+census_pop = census_data[['NAME', 'DP05_0001E', 'DP05_0018E', 'DP05_0037E']] 
 census_pop.columns = ['name', 'total_pop', 'median_age', 'white_pop']
 census_pop.drop(index=0, inplace=True)
 census_pop['ZCTA'] = [re.findall('\d{5}', obs)[0] for obs in census_pop.name]
 
 income_data = pd.read_csv('../data/raw/2020-median-income.csv')
-census_income = income_data[['NAME', 'S1901_C01_012E']] # ZCTA, median HH income
+# ZCTA, median HH income
+census_income = income_data[['NAME', 'S1901_C01_012E']]
 census_income.columns = ['name', 'median_income']
 census_income.drop(index=0, inplace=True)
 census_income['ZCTA'] = [re.findall('\d{5}', obs)[0] for obs in census_income.name]
@@ -100,4 +106,5 @@ shutoffs_pop = pd.merge(
     how='left', left_on='zip_code', right_on='ZIP_CODE'
 ).drop(columns='ZIP_CODE')
 shutoffs_pop.to_csv('../data/processed/processed-shutoffs.csv', index=False)
+shutoffs_pop
 

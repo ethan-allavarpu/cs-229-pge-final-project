@@ -18,6 +18,7 @@ import xgboost as xgb
 
 x_train = pd.read_csv("../data/processed/x_train-prelim.csv", index_col=0, dtype=str)
 x_test = pd.read_csv("../data/processed/x_test-prelim.csv", index_col=0, dtype=str)
+# Convert y_train, y_test to arrays rather than data frames
 y_train = pd.read_csv(
   "../data/processed/y_train.csv", index_col=0, dtype=float
 ).squeeze("columns")
@@ -29,6 +30,7 @@ y_test = pd.read_csv(
 # In[3]:
 
 
+# Apply correct conversion to input features
 def get_correct_types_x(df, numeric_cols):
     for col in ['deenergize_time', 'restoration_time']:
         df[col] = pd.to_datetime(df[col], format='%Y-%m-%d %H:%M:%S')
@@ -48,6 +50,7 @@ x_test = get_correct_types_x(x_test, numeric_cols)
 # In[4]:
 
 
+# Plot population vs. total affected vs. outage time
 sns.pairplot(
     pd.concat(
         [x_train[['total_pop', 'total_affected']], y_train], axis=1
@@ -60,6 +63,7 @@ plt.show()
 # In[5]:
 
 
+# Histogram of response
 sns.set_style('dark')
 sns.set_palette('deep')
 sns.histplot(y_train)
@@ -87,6 +91,9 @@ ulm_x_test = np.array(x_test.total_affected).reshape(-1, 1)
 ulm = LinearRegression()
 ulm.fit(ulm_x_train, y_train)
 ulm_preds = ulm.predict(ulm_x_test)
+train_devs = ((y_train - y_train.mean()) ** 2).sum()
+print("Train RMSE: ", np.sqrt(mean_squared_error(y_train, ulm.predict(ulm_x_train))))
+print("Train R-Squared:", 1 - (mean_squared_error(y_train, ulm.predict(ulm_x_train)) * len(y_train)) / train_devs)
 print("RMSE of Univariate Linear Regression = ", np.sqrt(mean_squared_error(ulm_preds, y_test)))
 # ulm.coef_
 
@@ -94,7 +101,7 @@ print("RMSE of Univariate Linear Regression = ", np.sqrt(mean_squared_error(ulm_
 # In[8]:
 
 
-# Preliminary linear model based on all data
+# Preliminary linear model based on all data (multiple regression)
 cols_for_baseline = [col for col in numeric_cols if col != 'time_out_min']
 
 mlm_x_train = x_train[cols_for_baseline]
@@ -102,13 +109,17 @@ mlm_x_test = x_test[cols_for_baseline]
 mlm = LinearRegression()
 mlm.fit(mlm_x_train, y_train)
 mlm_preds = mlm.predict(mlm_x_test)
+train_devs = ((y_train - y_train.mean()) ** 2).sum()
+# RMSE, R-Squared metrics
+print("Train RMSE: ", np.sqrt(mean_squared_error(y_train, mlm.predict(mlm_x_train))))
+print("Train R-Squared:", 1 - (mean_squared_error(y_train, mlm.predict(mlm_x_train)) * len(y_train)) / train_devs)
 print("RMSE of Multiple Linear Regression = ", np.sqrt(mean_squared_error(mlm_preds, y_test)))
 
 
 # In[9]:
 
 
-# Preliminary XGBoost model based on all data
+# Preliminary XGBoost model based on all data ("default" hyperparameters)
 xgb_params = {'max_depth':6, 'eta':.3, 'objective':'reg:squarederror'}
 num_round = 5
 d_train = xgb.DMatrix(mlm_x_train, label = y_train)
@@ -125,6 +136,7 @@ print("RMSE of XGBoost = ", np.sqrt(mean_squared_error(xgb_preds, y_test)))
 # In[10]:
 
 
+# Calculate RMSE, test R^2 as performance metrics (along with MAE, if necessary)
 def calc_test_r2(pred_vals, true_vals, baseline_rmse):
     sse = mean_squared_error(pred_vals, true_vals) * len(true_vals)
     sst = (baseline_rmse ** 2) * len(true_vals)
@@ -138,6 +150,7 @@ def calc_test_r2(pred_vals, true_vals, baseline_rmse):
 
 
 baseline_rmse = np.sqrt(((y_test - y_test.mean()) ** 2).mean())
+# Concatenate all three preliminary models into single dataframe
 prelim_model_results = pd.DataFrame({
     'Model': [
         'Simple Linear Regression', 'Multiple Linear Regression', 'XGBoost'
